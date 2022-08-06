@@ -12,6 +12,9 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.util.*
 
+/**
+ * Json形式で認証パラメーターを受け取るためのコンバーター
+ */
 class JsonBodyAuthenticationConverter(
     val messageReaders: List<HttpMessageReader<*>>
 ) : ServerAuthenticationConverter {

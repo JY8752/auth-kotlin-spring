@@ -11,10 +11,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
 import org.springframework.web.server.WebFilter
@@ -22,9 +22,7 @@ import org.springframework.web.server.WebFilter
 @Configuration
 @EnableWebFluxSecurity //SpringSecurityの有効化
 @EnableReactiveMethodSecurity //APIのエンドポイントごとの認可設定を有効化
-class SecurityConfig(
-    private val userDetailsService: HelloUserDetailsService
-) {
+class SecurityConfig {
     @Bean
     fun securityFilterChain(
         http: ServerHttpSecurity,
@@ -44,6 +42,9 @@ class SecurityConfig(
             .pathMatchers("/login").permitAll()
             .anyExchange().authenticated()
 
+        //ここは頑張ってCSRFトークンを渡すようなフィルタを自作したほうが本当はいい
+        http.csrf().disable()
+
         //認可で拒否した場合の処理
         http.exceptionHandling().authenticationEntryPoint(AuthenticationEntryPoint())
 
@@ -52,9 +53,10 @@ class SecurityConfig(
 
     @Bean
     fun authenticationManager(
-        passwordEncoder: BCryptPasswordEncoder
+        passwordEncoder: BCryptPasswordEncoder,
+        userDetailsService: HelloUserDetailsService
     ): UserDetailsRepositoryReactiveAuthenticationManager {
-        return UserDetailsRepositoryReactiveAuthenticationManager(this.userDetailsService).also {
+        return UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService).also {
             it.setPasswordEncoder(passwordEncoder)
         }
     }
@@ -75,6 +77,8 @@ class SecurityConfig(
             //認証成功・失敗時の処理
             it.setAuthenticationSuccessHandler(AuthenticationSuccessHandler())
             it.setAuthenticationFailureHandler(AuthenticationFailureHandler())
+            //セキュリティコンテキストの保存方法
+            it.setSecurityContextRepository(WebSessionServerSecurityContextRepository())
         }
     }
 }
