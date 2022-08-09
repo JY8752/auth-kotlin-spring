@@ -13,7 +13,6 @@ class AuthenticationManager(
     private val userDetailsService: HelloUserDetailsService,
 ) : UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService) {
     override fun authenticate(authentication: Authentication): Mono<Authentication> {
-        super.authenticate(authentication)
         val authToken = authentication.credentials.toString()
         val username = JWTUtils.getUsernameFromToken(authToken)
 
@@ -23,7 +22,8 @@ class AuthenticationManager(
             .map {
                 UsernamePasswordAuthenticationToken(
                     username,
-                    null
+                    null,
+                    emptyList() //必要であればロール設定を入れる
                 )
             }
     }

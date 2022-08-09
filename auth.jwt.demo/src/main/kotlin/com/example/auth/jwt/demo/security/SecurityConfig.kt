@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 @EnableWebFluxSecurity
 class SecurityConfig(
     private val authenticationManager: AuthenticationManager,
-    private val securityContextRepository: SecurityContextRepository
+    private val securityContextRepository: SecurityContextRepository,
 ) {
 
     @Bean

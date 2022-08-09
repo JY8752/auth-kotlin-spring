@@ -10,13 +10,12 @@ class JWTUtils {
         private const val secret = "ThisIsSecretForJWTHS512SignatureAlgorithmThatMUSTHave64ByteLength"
         private const val expirationTime = "28800" //sec
 
-        //        private val key Keys.hmacShaKeyFor(secret.toByteArray())
         private val key by lazy { Keys.hmacShaKeyFor(secret.toByteArray()) }
 
         /**
          * tokenからClaim(キーと値のペア)を取得する
          */
-        fun getAllClaimsFromToken(token: String): Claims? {
+        private fun getAllClaimsFromToken(token: String): Claims? {
             return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -28,11 +27,11 @@ class JWTUtils {
             return getAllClaimsFromToken(token)?.subject ?: ""
         }
 
-        fun getExpirationDateFromToken(token: String): Date? {
+        private fun getExpirationDateFromToken(token: String): Date? {
             return getAllClaimsFromToken(token)?.expiration
         }
 
-        fun isTokenExpired(token: String): Boolean {
+        private fun isTokenExpired(token: String): Boolean {
             val expiration = getExpirationDateFromToken(token) ?: run {
                 return true
             }
